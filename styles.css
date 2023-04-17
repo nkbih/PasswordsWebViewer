@@ -1,0 +1,73 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+  }
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 5rem;
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+h1 {
+    margin-bottom: 1rem;
+  }
+
+#password-list {
+    margin-top: 2rem;
+  }
+
+.password-item {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #f8f8fa;
+    border-radius: 4px;
+    border-color: #f8f8fa;
+    cursor: pointer;
+    transition: 0.1s;
+    max-width: calc(100% - 2rem); /* Задайте максимальную ширину элемента */
+    overflow: hidden; /* Скройте выступающую часть текста */
+    position: relative; /* Задайте относительное позиционирование для создания контекста слоев */
+    white-space: nowrap; /* Убедитесь, что текст будет в одну строку */
+  }
+  
+
+.password-item:hover {
+    background-color: #bedbf8;
+    border-radius: 10px;
+  }
+
+.password-item:active {
+    background-color: #7cbdfd; /* Выберите цвет фона, который вы хотите использовать при нажатии */
+  }
+
+.item-container {
+    display: flex;
+    margin-bottom: 1rem;
+  }
+
+.url-item {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+  }
+
+.password-item {
+    margin-right: 0.5rem;
+  }
+
+#password-input {
+    width: calc(100% - 1rem); /* 1rem будет общим отступом с учетом padding 0.5rem с каждой стороны */
+    height: 200px;
+    box-sizing: border-box; /* учитывает padding и border в общей ширине элемента */
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+  }
+
+.different {
+    background: #7cbdfd5c;
+    border-radius: 3px; /* Скругление углов, можно изменить значение для более или менее скругленных углов */
+    padding: 4px 1px; /* Отступы вокруг текста для лучшего вида */
+  }
+  
