@@ -1,15 +1,30 @@
 function createCopyButton(html, label) {
-    const item = document.createElement("button");
-    item.innerHTML = html;
-    item.className = "password-item";
-    item.setAttribute("data-clipboard-text", item.textContent);
-    item.setAttribute("aria-label", label);
-  
-    item.addEventListener("click", () => {
-      copyToClipboard(item.textContent);
+    return createButton("password-item", label, html, () => {
+      copyToClipboard(html);
     });
+  }
   
-    return item;
+  
+
+function createElement(tag, attributes = {}, content = "") {
+    const element = document.createElement(tag);
+    for (const [attr, value] of Object.entries(attributes)) {
+      element.setAttribute(attr, value);
+    }
+    element.innerHTML = content;
+    return element;
+  }
+
+  
+function createButton(className, label, dataText, eventListener) {
+    const button = createElement("button", {
+      class: className,
+      "data-clipboard-text": dataText,
+      "aria-label": label,
+    }, dataText);
+  
+    button.addEventListener("click", eventListener);
+    return button;
   }
   
   
@@ -36,28 +51,24 @@ function parsePasswords(text) {
 function displayPasswords(passwords) {
     const passwordList = document.getElementById("password-list");
     passwordList.innerHTML = "";
-
+    const fragment = document.createDocumentFragment();
+  
     passwords.forEach(({ url, username, password }, index) => {
-
-        const itemContainer = document.createElement("div");
-        itemContainer.className = "item-container";
-
-        const urlItem = createCopyButton(`${url}`, "URL");
-        urlItem.classList.add("url-item"); // добавляем класс url-item
-
-        const usernameItem = createCopyButton(`${username}`, "Логин");
-
-        const highlightedPasswords = highlightDifferences(passwords.map(p => p.password));
-        const passwordItem = createCopyButton(highlightedPasswords[index], "Пароль");
-
-
-        itemContainer.appendChild(urlItem);
-        itemContainer.appendChild(usernameItem);
-        itemContainer.appendChild(passwordItem);
-
-        passwordList.appendChild(itemContainer);
+      const itemContainer = createElement("div", { class: "item-container" });
+      const urlItem = createCopyButton(`${url}`, "URL");
+      urlItem.classList.add("url-item");
+  
+      const usernameItem = createCopyButton(`${username}`, "Логин");
+      const highlightedPasswords = highlightDifferences(passwords.map(p => p.password));
+      const passwordItem = createCopyButton(highlightedPasswords[index], "Пароль");
+  
+      itemContainer.append(urlItem, usernameItem, passwordItem);
+      fragment.appendChild(itemContainer);
     });
-}
+  
+    passwordList.appendChild(fragment);
+  }
+  
 
 function handleDragOver(event) {
     event.preventDefault();
