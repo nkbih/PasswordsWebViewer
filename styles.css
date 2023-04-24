@@ -2,72 +2,134 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f5f5f5;
   }
-
-.container {
+  
+  .container {
     max-width: 800px;
     margin: 0 auto;
     padding: 5rem;
     background-color: white;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   }
-
-h1 {
+  
+  h1 {
     margin-bottom: 1rem;
   }
-
-#password-list {
+  
+  #password-list {
     margin-top: 2rem;
   }
-
-.password-item {
+  
+  .item {
     display: inline-block;
     padding: 0.5rem 1rem;
     background-color: #f8f8fa;
-    border-radius: 4px;
-    border-color: #f8f8fa;
     cursor: pointer;
     transition: 0.1s;
-    max-width: calc(100% - 2rem); /* Задайте максимальную ширину элемента */
-    overflow: hidden; /* Скройте выступающую часть текста */
-    position: relative; /* Задайте относительное позиционирование для создания контекста слоев */
-    white-space: nowrap; /* Убедитесь, что текст будет в одну строку */
+    max-width: calc(100% - 2rem);
+    overflow: hidden;
+    position: relative;
+    white-space: nowrap;
+    border-radius: 0px;
+    border-color: #6eb6e67e;
+    transition: 0.1s;
   }
   
-
-.password-item:hover {
-    background-color: #bedbf8;
-    border-radius: 10px;
-  }
-
-.password-item:active {
-    background-color: #7cbdfd; /* Выберите цвет фона, который вы хотите использовать при нажатии */
-  }
-
-.item-container {
-    display: flex;
-    margin-bottom: 1rem;
-  }
-
-.url-item {
+  .url-item {
     flex-shrink: 0;
     margin-right: 0.5rem;
   }
-
-.password-item {
+  
+  .username-container {
+    display: flex;
     margin-right: 0.5rem;
+    overflow: hidden;
   }
-
-#password-input {
-    width: calc(100% - 1rem); /* 1rem будет общим отступом с учетом padding 0.5rem с каждой стороны */
+  
+  .related-passwords-button {
+    background-color: #f8f8fa;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.1s;
+    border-radius: 0;
+    overflow: visible;
+  }
+  
+  .item-container {
+    display: flex;
+    margin-bottom: 1rem;
+  }
+  
+  #password-input {
+    width: calc(100% - 1rem);
     height: 200px;
-    box-sizing: border-box; /* учитывает padding и border в общей ширине элемента */
+    box-sizing: border-box;
     margin-bottom: 1rem;
     padding: 0.5rem;
   }
-
-.different {
-    background: #7cbdfd20;
-    border-radius: 3px; /* Скругление углов, можно изменить значение для более или менее скругленных углов */
-    padding: 4px 1px; /* Отступы вокруг текста для лучшего вида */
+  
+  .item .different {
+    background: #7cbdfd40;
+    border-radius: 3px;
+    padding: 6px 0px;
+}
+  
+  .item:hover {
+    background-color: #bedbf8;
+    outline:1px dashed rgba(21, 78, 202, 0.473);
+    outline-offset:-4px
   }
   
+  .item:active {
+    background-color: #7cbdfd;
+  }
+  
+  
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .modal-open {
+    opacity: 1;
+  }
+
+  .modal-content {
+    position: relative;
+    background-color: #f9f9f9;
+    margin: 15% auto;
+    padding: 20px;
+    border: none;
+    width: 20%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Добавьте тень */
+  }
+  
+  .modal-close {
+    display: none;
+  }
+  
+  .modal-item {
+    display: column;
+  }
+
+  .modal-username {
+    font-weight: bold;
+    margin-bottom: 1rem;
+    display: block;
+  }
+  
+  .settings-button {
+    background-color: #f8f8fa;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+  }

@@ -8,8 +8,17 @@
 </head>
 <body ondragover="handleDragOver(event)" ondrop="handleDrop(event)">
     <div class="container">
+
         <textarea id="password-input" placeholder="Вставьте список паролей сюда"></textarea>
         <div id="password-list"></div>
+
+        <div id="related-password-modal" class="modal">
+            <div class="modal-content">
+                <span id="related-username" class="modal-username"></span>
+                <div id="related-password-list"></div>
+            </div>
+        </div>
+
     </div>
     <script src="app.js"></script>
 </body>
