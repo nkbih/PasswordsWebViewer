@@ -108,30 +108,50 @@ function displayPasswords(passwords) {
 
 
   
-
 function handleDragOver(event) {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'copy';
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'copy';
 }
 
 function handleDrop(event) {
-  event.preventDefault();
-  if (event.dataTransfer.items) {
-      const item = event.dataTransfer.items[0];
-      if (item.kind === "file") {
-          const file = item.getAsFile();
-          readFile(file);
-      }
-  }
+event.preventDefault();
+if (event.dataTransfer.items) {
+    const item = event.dataTransfer.items[0];
+    if (item.kind === "file") {
+        const file = item.getAsFile();
+        readFile(file);
+        showDropSuccessAnimation();
+    }
+}
+}
+
+function showDropSuccessAnimation() {
+  const overlay = document.createElement('div');
+  overlay.classList.add('overlay');
+
+  const container = document.querySelector('.container');
+  container.appendChild(overlay);
+
+  setTimeout(() => {
+    overlay.style.backgroundColor = 'rgba(144, 238, 144, 0.2)';
+  }, 0);
+
+  setTimeout(() => {
+    overlay.style.backgroundColor = 'rgba(144, 238, 144, 0)';
+  }, 200);
+
+  setTimeout(() => {
+    container.removeChild(overlay);
+  }, 1000);
 }
 
 function readFile(file) {
   const reader = new FileReader();
   reader.onload = (event) => {
-      const content = event.target.result;
-      const passwordInput = document.getElementById('password-input');
-      passwordInput.value = content;
-      handleInput({ target: passwordInput });
+    const content = event.target.result;
+    const passwordInput = document.getElementById('password-input');
+    passwordInput.value = content;
+    handleInput({ target: passwordInput });
   };
   reader.readAsText(file);
   }
@@ -345,6 +365,9 @@ function getSortingSettings() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
+
+  window.addEventListener("dragover", handleDragOver);
+  window.addEventListener("drop", handleDrop);
 
   const inputField = document.getElementById("password-input");
   inputField.addEventListener("input", handleInput);
