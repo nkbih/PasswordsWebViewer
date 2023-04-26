@@ -11,39 +11,42 @@ function createElement(tag, attributes = {}, content = "") {
     for (const [attr, value] of Object.entries(attributes)) {
       element.setAttribute(attr, value);
     }
-    element.innerHTML = content;
+    element.innerHTML = content
     return element;
   }
 
   
-  function createButton(className, label, dataText, eventListener) {
-    const button = createElement("button", {
-      class: `item ${className}`,
-      "data-clipboard-text": dataText,
-      "aria-label": label,
-    }, dataText);
-  
-    button.addEventListener("click", eventListener);
-    return button;
+function createButton(className, label, dataText, eventListener) {
+  const button = createElement("button", {
+    class: `item ${className}`,
+    "data-clipboard-text": dataText,
+    "aria-label": label,
+  }, dataText);
+
+  button.addEventListener("click", eventListener);
+  return button;
+}
+
+function createRelatedPasswordsButton(username, passwords) {
+  const relatedPasswords = getRelatedPasswords(username, passwords);
+
+  if (relatedPasswords.length === 1) {
+    return null;
   }
   
-  function createRelatedPasswordsButton(username, passwords) {
-    const relatedPasswords = getRelatedPasswords(username, passwords);
-    
-    const button = createElement("button", {
-      class: "item related-passwords-button",
-      "aria-label": "Показать связанные пароли",
-    }, relatedPasswords.length);
-  
-    button.addEventListener("click", () => {
-      showRelatedPasswords(username, passwords);
-    });
-  
-    return button;
-  }
-  
-  
-  
+  const button = createElement("button", {
+    class: "item related-passwords-button",
+    "aria-label": "Показать связанные пароли",
+  }, relatedPasswords.length);
+
+  button.addEventListener("click", () => {
+    showRelatedPasswords(username, passwords);
+  });
+
+  return button;
+};
+
+
 function parsePasswords(text) {
     const regex = /URL: (.*?)\nUsername: (.*?)\nPassword: (.*?)\nApplication:.*?/gs;
     const passwords = [];
@@ -63,11 +66,6 @@ function parsePasswords(text) {
     return passwords;
 }
   
-function getRelatedPasswords(username, passwords) {
-    const relatedPasswords = passwords.filter(p => p.username === username).map(p => p.password);
-    return Array.from(new Set(relatedPasswords));
-  }
-
 
 function displayPasswords(passwords) {
   const passwordList = document.getElementById("password-list");
@@ -91,12 +89,13 @@ function displayPasswords(passwords) {
     urlItem.classList.add("url-item");
 
     const usernameItem = createCopyButton(`${username}`, "login");
-    const relatedPasswordsButton = createRelatedPasswordsButton(
-      username,
-      passwords
-    );
+    const relatedPasswordsButton = createRelatedPasswordsButton(username, passwords);
     const usernameContainer = createElement("div", { class: "username-container" });
-    usernameContainer.append(usernameItem, relatedPasswordsButton);
+    usernameContainer.append(usernameItem);
+
+    if (relatedPasswordsButton) {
+      usernameContainer.appendChild(relatedPasswordsButton);
+    }
 
     const passwordItem = createCopyButton(password, "password");
 
@@ -107,6 +106,7 @@ function displayPasswords(passwords) {
   passwordList.appendChild(fragment);
 }
 
+
   
 
 function handleDragOver(event) {
@@ -115,55 +115,62 @@ function handleDragOver(event) {
 }
 
 function handleDrop(event) {
-    event.preventDefault();
-    if (event.dataTransfer.items) {
-        const file = event.dataTransfer.items[0].getAsFile();
-        readFile(file);
-    }
+  event.preventDefault();
+  if (event.dataTransfer.items) {
+      const item = event.dataTransfer.items[0];
+      if (item.kind === "file") {
+          const file = item.getAsFile();
+          readFile(file);
+      }
+  }
 }
 
 function readFile(file) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-        const content = event.target.result;
-        const passwordInput = document.getElementById('password-input');
-        passwordInput.value = content;
-        handleInput({ target: passwordInput });
-    };
-    reader.readAsText(file);
-}
+  const reader = new FileReader();
+  reader.onload = (event) => {
+      const content = event.target.result;
+      const passwordInput = document.getElementById('password-input');
+      passwordInput.value = content;
+      handleInput({ target: passwordInput });
+  };
+  reader.readAsText(file);
+  }
 
 function handleInput(event) {
-    const inputText = event.target.value;
-    const passwords = parsePasswords(inputText);
-    displayPasswords(passwords);
+  const inputText = event.target.value;
+  const passwords = parsePasswords(inputText);
+  displayPasswords(passwords);
   }
 
 
 
 
-function copyToClipboard(text) {
-    const textArea = document.createElement("textarea");
-    textArea.style.position = "fixed";
-    textArea.style.opacity = "0";
-    textArea.value = text;
-    document.body.appendChild(textArea);
-    textArea.focus();
-    textArea.select();
-  
-    try {
-      document.execCommand("copy");
-    } catch (err) {
-      console.error("Can't copy: ", err);
-    }
-  
-    document.body.removeChild(textArea);
+function copyToClipboard(html) {
+  const textArea = document.createElement("textarea");
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  const text = div.textContent || div.innerText || "";
+
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    document.execCommand("copy");
+  } catch (err) {
+    console.error("Can't copy: ", err);
+  }
+
+  document.body.removeChild(textArea);
   }
 
 
 
 function highlightDifferences(passwords) {
-  const similarityThreshold = 0.7;
+  const similarityThreshold = 0.75;
 
   function levenshteinDistance(a, b) {
     const matrix = [];
@@ -258,11 +265,14 @@ function openModal(modalId) {
     modal.classList.add("modal-open");
   }, 50);
 
-  window.onclick = (event) => {
+  window.addEventListener("click", windowClickHandler);
+
+  function windowClickHandler(event) {
     if (event.target === modal) {
       closeModal(modalId);
+      window.removeEventListener("click", windowClickHandler);
     }
-  };
+  }
 }
 
 function closeModal(modalId) {
@@ -271,6 +281,22 @@ function closeModal(modalId) {
   setTimeout(() => {
     modal.style.display = "none";
   }, 300);
+}
+
+function getRelatedPasswords(username, passwords) {
+  const related = passwords.filter(p => p.username === username);
+  const uniqueRelated = [];
+
+  related.forEach(passwordObj => {
+    const existing = uniqueRelated.find(
+      p => p.password.replace(/<\/?span[^>]*>/g, "") === passwordObj.password.replace(/<\/?span[^>]*>/g, "")
+    );
+    if (!existing) {
+      uniqueRelated.push(passwordObj);
+    }
+  });
+
+  return uniqueRelated;
 }
 
 function showRelatedPasswords(username, passwords) {
@@ -284,7 +310,7 @@ function showRelatedPasswords(username, passwords) {
 
   const fragment = document.createDocumentFragment();
 
-  relatedPasswords.forEach((password) => {
+  relatedPasswords.forEach(({ password }) => {
     const passwordItem = createCopyButton(password, "related-password");
     passwordItem.classList.add("modal-item");
     fragment.appendChild(passwordItem);
@@ -297,47 +323,31 @@ function showRelatedPasswords(username, passwords) {
 }
 
 
-function updatePasswordList() {
-  const settings = getSortingSettings();
-  const passwordList = document.getElementById("password-list");
-  const passwords = getPasswords(); // Функция, которая возвращает массив паролей
 
-  // Очистите список паролей
-  passwordList.innerHTML = "";
 
-  // Отсортируйте пароли в соответствии с настройками сортировки
-  const sortedPasswords = passwords.sort((a, b) => {
-    const aDomainSettings = settings.find((setting) => setting.domain === a.domain);
-    const bDomainSettings = settings.find((setting) => setting.domain === b.domain);
-    const aPriority = aDomainSettings ? settings.indexOf(aDomainSettings) : settings.length;
-    const bPriority = bDomainSettings ? settings.indexOf(bDomainSettings) : settings.length;
+function getSortingSettings() {
+  const sortingSettings = [
+    {
+      domain: "accounts.google.com",
+      priority: 1,
+    },
+    {
+      domain: "steamcommunity.com",
+      priority: 2,
+    },
+    {
+      domain: "login.live.com",
+      priority: 3,
+    },
+  ];
 
-    return aPriority - bPriority;
-  });
-
-  // Добавьте отсортированные пароли в список
-  sortedPasswords.forEach((passwordData) => {
-    const domainSettings = settings.find((setting) => setting.domain === passwordData.domain);
-    const passwordItem = createPasswordItem(passwordData, domainSettings); // Функция, которая создает элемент списка паролей с учетом настроек
-    passwordList.appendChild(passwordItem);
-  });
+  return sortingSettings;
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
-
-  const openSettingsButton = document.getElementById("open-settings");
-  openSettingsButton.addEventListener("click", showSettings);
-  applySortingSettings();
-  updatePasswordList();
 
   const inputField = document.getElementById("password-input");
   inputField.addEventListener("input", handleInput);
   inputField.addEventListener("change", handleInput);
 
-  document.getElementById("save-settings-button").addEventListener("click", saveSettings);
-  document.getElementById("add-domain-button").addEventListener("click", () => {
-    addDomainSetting();
-  });
-  
 });
