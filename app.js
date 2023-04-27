@@ -54,13 +54,13 @@ function parsePasswords(text) {
 
     while ((match = regex.exec(text)) !== null) {
         const url = new URL(match[1].startsWith("android://")
-            ? `https://${match[1].split("@")[1]}`
-            : match[1]).hostname.replace(/^www\./, "");
+          ? `https://${match[1].split("@")[1]}`
+          : match[1]).hostname.replace(/^www\./, "");
         passwords.push({
-            url,
-            username: match[2],
-            password: match[3],
-            });
+          url,
+          username: match[2],
+          password: match[3],
+          });
     }
 
     return passwords;
@@ -137,12 +137,12 @@ function showDropSuccessAnimation() {
   }, 0);
 
   setTimeout(() => {
-    overlay.style.backgroundColor = 'rgba(144, 238, 144, 0)';
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
   }, 200);
 
   setTimeout(() => {
     container.removeChild(overlay);
-  }, 1000);
+  }, 3000);
 }
 
 function readFile(file) {
@@ -190,8 +190,7 @@ function copyToClipboard(html) {
 
 
 function highlightDifferences(passwords) {
-  console.log('123')
-  const similarityThreshold = 0.75;
+  const similarityThreshold = 0.7;
 
   function levenshteinDistance(a, b) {
     const matrix = [];
