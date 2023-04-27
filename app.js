@@ -190,6 +190,7 @@ function copyToClipboard(html) {
 
 
 function highlightDifferences(passwords) {
+  console.log('123')
   const similarityThreshold = 0.75;
 
   function levenshteinDistance(a, b) {

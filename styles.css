@@ -65,6 +65,12 @@ body {
     overflow: visible;
   }
 
+  #related-password-list {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
 .item-container {
   display: flex;
   margin-bottom: 1rem;
@@ -115,14 +121,21 @@ body {
   }
 
   .modal-content {
-    position: relative;
+    display: inline-block;
+    flex-direction: column;
+    align-items: center;
+    position: fixed;
     background-color: #f9f9f9;
-    margin: 15% auto;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     padding: 20px;
     border: none;
-    width: 20%;
+    width: auto;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Добавьте тень */
   }
+  
+  
   
   .modal-close {
     display: none;
