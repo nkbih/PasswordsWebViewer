@@ -1,10 +1,33 @@
+
+
+function copyToClipboard(html) {
+  const textArea = document.createElement("textarea");
+  const div = document.createElement("div");
+  div.innerHTML = html;
+  const text = div.textContent || div.innerText || "";
+
+  textArea.style.position = "fixed";
+  textArea.style.opacity = "0";
+  textArea.value = text;
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    document.execCommand("copy");
+  } catch (err) {
+    console.error("Can't copy: ", err);
+  }
+
+  document.body.removeChild(textArea);
+  }
+
+
 function createCopyButton(html, label) {
     return createButton("password-item", label, html, () => {
       copyToClipboard(html);
     });
   }
-  
-  
 
 function createElement(tag, attributes = {}, content = "") {
     const element = document.createElement(tag);
@@ -14,7 +37,6 @@ function createElement(tag, attributes = {}, content = "") {
     element.innerHTML = content
     return element;
   }
-
   
 function createButton(className, label, dataText, eventListener) {
   const button = createElement("button", {
@@ -40,11 +62,25 @@ function createRelatedPasswordsButton(username, passwords) {
   }, relatedPasswords.length);
 
   button.addEventListener("click", () => {
-    showRelatedPasswords(username, passwords);
+    showRelatedPasswords(username, relatedPasswords);
   });
 
   return button;
 };
+
+function createStatisticButton(className, text, dataGetter, onClick) {
+  const button = document.createElement("button");
+  button.className = className;
+  button.textContent = text;
+
+  button.addEventListener("click", () => {
+    const data = dataGetter();
+    onClick(data);
+  });
+
+  return button;
+}
+
 
 
 function parsePasswords(text) {
@@ -104,89 +140,135 @@ function displayPasswords(passwords) {
   });
 
   passwordList.appendChild(fragment);
-}
-
-
   
-function handleDragOver(event) {
-  event.preventDefault();
-  event.dataTransfer.dropEffect = 'copy';
+  // Обновление информационного блока
+  updateInfoBlock(passwords);
 }
 
-function handleDrop(event) {
-event.preventDefault();
-if (event.dataTransfer.items) {
-    const item = event.dataTransfer.items[0];
-    if (item.kind === "file") {
-        const file = item.getAsFile();
-        readFile(file);
-        showDropSuccessAnimation();
+function updateInfoBlock(passwords) {
+  const totalRecords = passwords.length;
+  const uniqueLoginsArray = Array.from(new Set(passwords.map(p => p.username)));
+  const uniquePasswordsArray = Array.from(new Set(passwords.map(p => p.password.replace(/<\/?span[^>]*>/g, ""))));
+  const uniqueUrlsArray = Array.from(new Set(passwords.map(p => p.url)));
+
+  const uniqueLogins = uniqueLoginsArray.length;
+  const uniquePasswords = uniquePasswordsArray.length;
+  const uniqueUrls = uniqueUrlsArray.length;
+
+  const infoBlock = document.getElementById("info-block");
+  infoBlock.innerHTML = "";
+
+  const totalRecordsButton = createStatisticButton("info-button", "Site - " + uniqueUrls, () => {
+    return uniqueUrlsArray.map(url => ({ password: url }));
+  }, (urls) => {
+    showRelatedPasswords("Sites", urls);
+  });
+  const uniqueLoginsButton = createStatisticButton("info-button", "Login - " + uniqueLogins, () => {
+    return uniqueLoginsArray.map(username => ({ password: username }));
+  }, (usernames) => {
+    showRelatedPasswords("Logins", usernames);
+  });
+  const uniquePasswordsButton = createStatisticButton("info-button", "Pass - " + uniquePasswords, () => {
+    return uniquePasswordsArray.map(password => ({ password: password }));
+  }, (uniquePasswords) => {
+    showRelatedPasswords("Passwords", uniquePasswords);
+  });
+
+  infoBlock.append(totalRecordsButton, uniqueLoginsButton, uniquePasswordsButton);
+}
+
+
+
+
+
+
+
+// Ваши функции
+function showModal(contentType, dataList) {
+    const modal = document.getElementById("data-modal");
+    const header = document.getElementById("inmodal-header");
+    const list = document.getElementById("inmodal-data-list");
+
+    header.textContent = contentType === "passwords" ? "Пароли:" : "Логины:";
+    list.innerHTML = "";
+
+    dataList.forEach((item) => {
+        const button = document.createElement("button");
+        button.innerText = item;
+        button.className = "item";
+        list.appendChild(button);
+    });
+
+    modal.classList.add("modal-open");
+}
+
+function hideModal() {
+    const modal = document.getElementById("data-modal");
+    modal.classList.remove("modal-open");
+}
+
+function openModal(modalId) {
+  const modal = document.getElementById(modalId);
+  modal.style.display = "block";
+  setTimeout(() => {
+    modal.classList.add("modal-open");
+  }, 50);
+
+  window.addEventListener("click", windowClickHandler);
+
+  function windowClickHandler(event) {
+    if (event.target === modal) {
+      closeModal(modalId);
+      window.removeEventListener("click", windowClickHandler);
     }
-}
-}
-
-function showDropSuccessAnimation() {
-  const overlay = document.createElement('div');
-  overlay.classList.add('overlay');
-
-  const container = document.querySelector('.container');
-  container.appendChild(overlay);
-
-  setTimeout(() => {
-    overlay.style.backgroundColor = 'rgba(144, 238, 144, 0.2)';
-  }, 0);
-
-  setTimeout(() => {
-    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
-  }, 200);
-
-  setTimeout(() => {
-    container.removeChild(overlay);
-  }, 3000);
+  }
 }
 
-function readFile(file) {
-  const reader = new FileReader();
-  reader.onload = (event) => {
-    const content = event.target.result;
-    const passwordInput = document.getElementById('password-input');
-    passwordInput.value = content;
-    handleInput({ target: passwordInput });
-  };
-  reader.readAsText(file);
-  }
+function closeModal(modalId) {
+  const modal = document.getElementById(modalId);
+  modal.classList.remove("modal-open");
+  setTimeout(() => {
+    modal.style.display = "none";
+  }, 300);
+}
 
-function handleInput(event) {
-  const inputText = event.target.value;
-  const passwords = parsePasswords(inputText);
-  displayPasswords(passwords);
-  }
+function getRelatedPasswords(username, passwords) {
+  const related = passwords.filter(p => p.username === username);
+  const uniqueRelated = [];
 
+  related.forEach(passwordObj => {
+    const existing = uniqueRelated.find(
+      p => p.password.replace(/<\/?span[^>]*>/g, "") === passwordObj.password.replace(/<\/?span[^>]*>/g, "")
+    );
+    if (!existing) {
+      uniqueRelated.push(passwordObj);
+    }
+  });
 
+  return uniqueRelated;
+}
 
+function showRelatedPasswords(username, items) {
+  const passwordList = document.getElementById("inmodal-data-list");
+  passwordList.innerHTML = "";
 
-function copyToClipboard(html) {
-  const textArea = document.createElement("textarea");
-  const div = document.createElement("div");
-  div.innerHTML = html;
-  const text = div.textContent || div.innerText || "";
+  // Установить имя пользователя
+  const relatedUsername = document.getElementById("inmodal-header");
+  relatedUsername.textContent = username;
 
-  textArea.style.position = "fixed";
-  textArea.style.opacity = "0";
-  textArea.value = text;
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
+  const fragment = document.createDocumentFragment();
 
-  try {
-    document.execCommand("copy");
-  } catch (err) {
-    console.error("Can't copy: ", err);
-  }
+  items.forEach(({ password }) => {
+    const passwordItem = createCopyButton(password, "related-password");
+    passwordItem.classList.add("modal-item");
+    fragment.appendChild(passwordItem);
+  });
 
-  document.body.removeChild(textArea);
-  }
+  passwordList.appendChild(fragment);
 
+  // Открыть модальное окно
+  openModal("data-modal");
+}
 
 
 function highlightDifferences(passwords) {
@@ -278,70 +360,67 @@ function highlightDifferences(passwords) {
   
 
 
-function openModal(modalId) {
-  const modal = document.getElementById(modalId);
-  modal.style.display = "block";
+
+
+function showDropSuccessAnimation() {
+  const overlay = document.createElement('div');
+  overlay.classList.add('overlay');
+
+  const container = document.querySelector('.container');
+  container.appendChild(overlay);
+
   setTimeout(() => {
-    modal.classList.add("modal-open");
-  }, 50);
+    overlay.style.backgroundColor = 'rgba(144, 238, 144, 0.2)';
+  }, 0);
 
-  window.addEventListener("click", windowClickHandler);
+  setTimeout(() => {
+    overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+  }, 200);
 
-  function windowClickHandler(event) {
-    if (event.target === modal) {
-      closeModal(modalId);
-      window.removeEventListener("click", windowClickHandler);
-    }
+  setTimeout(() => {
+    container.removeChild(overlay);
+  }, 3000);
+}
+
+function readFile(file) {
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const content = event.target.result;
+    const passwordInput = document.getElementById('password-input');
+    passwordInput.value = content;
+    handleInput({ target: passwordInput });
+  };
+  reader.readAsText(file);
   }
+
+function handleInput(event) {
+  const inputText = event.target.value;
+  const passwords = parsePasswords(inputText);
+  displayPasswords(passwords);
+  }
+
+
+
+
+
+
+
+function handleDragOver(event) {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'copy';
 }
 
-function closeModal(modalId) {
-  const modal = document.getElementById(modalId);
-  modal.classList.remove("modal-open");
-  setTimeout(() => {
-    modal.style.display = "none";
-  }, 300);
-}
-
-function getRelatedPasswords(username, passwords) {
-  const related = passwords.filter(p => p.username === username);
-  const uniqueRelated = [];
-
-  related.forEach(passwordObj => {
-    const existing = uniqueRelated.find(
-      p => p.password.replace(/<\/?span[^>]*>/g, "") === passwordObj.password.replace(/<\/?span[^>]*>/g, "")
-    );
-    if (!existing) {
-      uniqueRelated.push(passwordObj);
+function handleDrop(event) {
+event.preventDefault();
+if (event.dataTransfer.items) {
+    const item = event.dataTransfer.items[0];
+    if (item.kind === "file") {
+        const file = item.getAsFile();
+        readFile(file);
+        showDropSuccessAnimation();
     }
-  });
-
-  return uniqueRelated;
 }
-
-function showRelatedPasswords(username, passwords) {
-  const relatedPasswords = getRelatedPasswords(username, passwords);
-  const passwordList = document.getElementById("related-password-list");
-  passwordList.innerHTML = "";
-
-  // Установить имя пользователя
-  const relatedUsername = document.getElementById("related-username");
-  relatedUsername.textContent = username;
-
-  const fragment = document.createDocumentFragment();
-
-  relatedPasswords.forEach(({ password }) => {
-    const passwordItem = createCopyButton(password, "related-password");
-    passwordItem.classList.add("modal-item");
-    fragment.appendChild(passwordItem);
-  });
-
-  passwordList.appendChild(fragment);
-
-  // Открыть модальное окно
-  openModal("related-password-modal");
 }
-
 
 
 
@@ -363,6 +442,7 @@ function getSortingSettings() {
 
   return sortingSettings;
 }
+
 
 document.addEventListener("DOMContentLoaded", function () {
 
