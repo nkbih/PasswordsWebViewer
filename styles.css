@@ -158,18 +158,20 @@ max-width: 100%;
 }
 
 .modal-content {
-  display: inline-block;
-  flex-direction: column;
-  align-items: center;
-  position: fixed;
   background-color: #f9f9f9;
+  padding: 20px;
+  border: none;
+  width: auto; /* Измените значение на 100% */
+  max-width: 600px; /* Ограничьте максимальную ширину, например 80% экрана */
+  height: auto;
+  max-height: 80%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Добавьте тень */
+  overflow-y: auto; /* Включите вертикальную прокрутку, если контент выходит за границы контейнера */
+  max-height: 80%; /* Ограничьте высоту контента, чтобы он не выходил за границы модального окна */
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  padding: 20px;
-  border: none;
-  width: auto;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); /* Добавьте тень */
 }
 
 .modal-close {
