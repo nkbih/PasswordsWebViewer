@@ -16,7 +16,3 @@
 ![image](https://user-images.githubusercontent.com/93801635/235357828-a4f5485b-3d10-415d-a00b-4c1a7b109a73.png)
 
 ![image](https://user-images.githubusercontent.com/93801635/235357786-fad7144f-0c4e-46ae-87c3-36800bf94eaf.png)
-
-
-### Запуск:
-Просто скачайте все файлы этого проекта, распакуйте их, и откройте index.html в браузере
